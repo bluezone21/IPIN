@@ -76,9 +76,14 @@
   }
   .field input:focus { border-color: var(--green); }
   .config-note {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    justify-content:start;
     background: var(--gray); border-radius: 10px;
     padding: 12px 14px; margin-bottom: 20px;
     font-size: 12px; color: var(--text-muted); line-height: 1.6;
+    word-break: break-all;
   }
   .config-note a { color: var(--green-dark); text-decoration: none; font-weight: 500; }
   .config-btn {
@@ -224,7 +229,9 @@
   .qty-btn.plus { background: var(--green); color: #fff; }
   .qty-num { font-size: 14px; font-weight: 600; color: var(--text); min-width: 22px; text-align: center; }
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
-
+  .qris-info{
+    margin-top: 15px;margin-bottom: 15px; padding: 12px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+  }
   /* ── CART BAR ── */
   .cart-bar {
     position: absolute; bottom: 68px; left: 12px; right: 12px;
@@ -244,15 +251,15 @@
   .sec-pad { padding: 16px; }
   .sec-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
   .stok-item {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
     border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 12px 14px; margin-bottom: 8px; background: var(--bg);
+    padding: 10px 12px; margin-bottom: 8px; background: var(--bg);
   }
-  .stok-emoji { width: 40px; height: 40px; background: var(--green-light); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .stok-emoji { width: 38px; height: 38px; background: var(--green-light); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
   .stok-info { flex: 1; min-width: 0; }
   .stok-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .stok-price { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-  .stok-ctrl { display: flex; align-items: center; gap: 6px; }
+  .stok-ctrl { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
   .stok-btn {
     width: 30px; height: 30px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--bg);
@@ -261,6 +268,37 @@
   }
   .stok-btn:active { background: var(--gray); }
   .stok-qty { font-size: 13px; font-weight: 600; color: var(--text); min-width: 28px; text-align: center; }
+  .stok-actions { display: flex; gap: 5px; margin-left: 4px; }
+  .stok-edit-btn {
+    width: 28px; height: 28px; border-radius: 7px;
+    border: 1px solid var(--border); background: var(--blue-light);
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    color: var(--blue); transition: background .1s; cursor: pointer;
+  }
+  .stok-del-btn {
+    width: 28px; height: 28px; border-radius: 7px;
+    border: 1px solid var(--border); background: var(--red-light);
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    color: var(--red); transition: background .1s; cursor: pointer;
+  }
+  .stok-edit-btn:active { background: #d4e0fc; }
+  .stok-del-btn:active { background: #f5c6c6; }
+
+  /* ── CONFIRM DIALOG ── */
+  .confirm-card {
+    background: var(--bg); border-radius: 18px; padding: 24px;
+    margin: 24px; width: calc(100% - 48px); text-align: center;
+  }
+  .confirm-icon {
+    width: 52px; height: 52px; background: var(--red-light);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin: 0 auto 12px;
+  }
+  .confirm-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .confirm-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 8px; }
+  .btn-confirm-cancel { flex: 1; padding: 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; }
+  .btn-confirm-del { flex: 1; padding: 11px; border: none; border-radius: 10px; background: var(--red); font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
   .add-btn {
     width: 100%; padding: 13px;
     background: var(--green-light);
@@ -450,60 +488,23 @@
       <button class="config-btn" onclick="connectSupabase()" id="connect-btn">Hubungkan & Lanjutkan</button>
       <div class="config-or">atau</div>
       <button class="config-demo-btn" onclick="useDemoMode()">Gunakan Mode Demo (Data Lokal)</button><br><br>
-      <div class="config-note">
-        Dapatkan kredensial di <a href="https://supabase.com/dashboard" target="_blank">supabase.com/dashboard</a> →
-        Project Settings → API. Gunakan <strong>anon key</strong> (bukan service_role).
-        <br><br>
-        Jalankan SQL berikut di <strong>SQL Editor</strong> Supabase Anda untuk membuat tabel:
-        <br><br>
-        <code style="font-size:11px;background:#eee;display:block;padding:8px;border-radius:6px;white-space:pre-wrap;color:#333">-- Users (kasir)
-CREATE TABLE users (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  username text UNIQUE NOT NULL,
-  password text NOT NULL,
-  name text NOT NULL,
-  role text DEFAULT 'kasir',
-  initials text
-);
+      
+      <div class="config-note" style="display: flex; flex-direction: column; gap: 12px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Supabase URL →</span>
+          <button class="btn-copy" onclick="copyToClipboard('https://ctjkeahqzzvmnmwjdxiq.supabase.co', this, 'sb-url')" style="width: 100%; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; text-align: left; font-family: monospace; font-size: 12px; color: #334155; cursor: pointer; transition: all 0.2s; word-break: break-all;">
+            https://ctjkeahqzzvmnmwjdxiq.supabase.co
+          </button>
+        </div>
 
--- Products
-CREATE TABLE products (
-  id serial PRIMARY KEY,
-  name text NOT NULL,
-  price int NOT NULL,
-  stock int DEFAULT 0,
-  emoji text DEFAULT '📦',
-  created_at timestamptz DEFAULT now()
-);
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Anon Key →</span>
+          <button class="btn-copy" onclick="copyToClipboard('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0amtlYWhxenp2bW5td2pkeGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDExNTUsImV4cCI6MjA5NTgxNzE1NX0.ItXpiU_qGa2JtUdtqQL-UXqHZ77oJRrZmUGoQ5kA6-I', this, 'sb-key')" style="width: 100%; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; text-align: left; font-family: monospace; font-size: 11px; color: #334155; cursor: pointer; transition: all 0.2s; word-break: break-all; line-height: 1.4;">
+            eyJhbGciOiJIUzI1NiIs... [Klik untuk Salin & Tempel]
+          </button>
+        </div>
 
--- Transactions
-CREATE TABLE transactions (
-  id serial PRIMARY KEY,
-  code text,
-  total int NOT NULL,
-  method text DEFAULT 'tunai',
-  kasir text,
-  items jsonb,
-  created_at timestamptz DEFAULT now()
-);
-
--- Seed users
-INSERT INTO users (username,password,name,role,initials) VALUES
-('admin','admin123','Admin','Administrator','AD'),
-('kasir','kasir123','Kasir','Kasir Warung','KS');
-
--- Seed products
-INSERT INTO products (name,price,stock,emoji) VALUES
-('Indomie Goreng',3500,48,'🍜'),
-('Teh Botol Sosro',4500,24,'🍵'),
-('Aqua 600ml',3000,60,'💧'),
-('Sabun Lifebuoy',7000,15,'🧼'),
-('Gula 1kg',14000,20,'🍬'),
-('Minyak 1L',18000,10,'🛢️'),
-('Rokok Sampoerna',25000,30,'🚬'),
-('Kopi Sachet',2500,100,'☕');</code>
-        <br>
-        <strong>Catatan:</strong> Aktifkan Row Level Security (RLS) sesuai kebutuhan produksi Anda.
       </div>
     </div>
   </div>
@@ -533,6 +534,10 @@ INSERT INTO products (name,price,stock,emoji) VALUES
         <div class="error-msg" id="login-error">Username atau password salah</div>
       </div>
       <button class="login-btn" onclick="doLogin()" id="login-btn">Masuk</button>
+      <div class="helper-login" style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+        <span>Username : kasir</span>
+        <span>Password : kasir123</span>
+      </div>
     </div>
     <div class="login-footer">
       <span onclick="backToConfig()" style="cursor:pointer;color:var(--text-muted)">⬅ Ubah konfigurasi</span>
@@ -663,6 +668,15 @@ INSERT INTO products (name,price,stock,emoji) VALUES
         <div class="pay-opt selected" id="opt-tunai" onclick="selectPay('tunai')">💵 Tunai</div>
         <div class="pay-opt" id="opt-qris" onclick="selectPay('qris')">📱 QRIS / Transfer</div>
       </div>
+
+      <div id="qris-info" class="hidden qris-info">
+        <p style="margin: 0 0 6px 0; font-size: 12px; color: #166534; font-weight: bold;">Silahkan transfer ke rekening berikut:</p>
+        <div style="font-family: monospace; font-size: 14px; color: #1e293b; line-height: 1.4;">
+          <strong>Bank BCA:</strong> 5865312030 <br>
+          <strong>A/N:</strong> Tiara Khaerunisa
+        </div>
+      </div>
+
       <div id="cash-section">
         <div class="cash-lbl">Uang diterima</div>
         <input class="cash-input" type="number" id="cash-input" placeholder="0" oninput="calcChange()">
@@ -712,15 +726,28 @@ INSERT INTO products (name,price,stock,emoji) VALUES
       <div class="sheet-handle"></div>
       <div class="sheet-title" id="add-prod-title">Tambah Produk</div>
       <div class="field"><label>Nama Produk</label><input type="text" id="np-name" placeholder="Contoh: Indomie Goreng"></div>
-      <div class="field"><label>Harga (Rp)</label><input type="number" id="np-price" placeholder="3500"></div>
+      <div class="field"><label>Harga Beli (Rp)</label><input type="number" id="np-price-buy" placeholder="3000"></div>
+      <div class="field"><label>Harga Jual (Rp)</label><input type="number" id="np-price-sell" placeholder="3500"></div>
       <div class="field"><label>Stok Awal</label><input type="number" id="np-stock" placeholder="10"></div>
       <div class="field"><label>Emoji</label><input type="text" id="np-emoji" placeholder="🍜" maxlength="2"></div>
       <button class="login-btn" onclick="saveProduct()" id="save-prod-btn">Simpan Produk</button>
     </div>
   </div>
 
-</div>
+  <!-- ═══ CONFIRM DELETE OVERLAY ═══ -->
+  <div class="overlay-wrap hidden" id="confirm-del-overlay">
+    <div class="confirm-card">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title">Hapus Produk?</div>
+      <div class="confirm-sub" id="confirm-del-msg">Tindakan ini tidak dapat dibatalkan.</div>
+      <div class="confirm-btns">
+        <button class="btn-confirm-cancel" onclick="closeConfirmDel()">Batal</button>
+        <button class="btn-confirm-del" onclick="confirmDeleteProduct()">Hapus</button>
+      </div>
+    </div>
+  </div>
 
+</div>
 <script>
 // ── CONFIG & STATE ──────────────────────────────────────────────
 let sb = null;
@@ -736,14 +763,14 @@ const DEMO_USERS = [
   {id:'2',username:'kasir',password:'kasir123',name:'Kasir',role:'Kasir Warung',initials:'KS'},
 ];
 let demoProducts = [
-  {id:1,name:'Indomie Goreng',price:3500,stock:48,emoji:'🍜'},
-  {id:2,name:'Teh Botol Sosro',price:4500,stock:24,emoji:'🍵'},
-  {id:3,name:'Aqua 600ml',price:3000,stock:60,emoji:'💧'},
-  {id:4,name:'Sabun Lifebuoy',price:7000,stock:15,emoji:'🧼'},
-  {id:5,name:'Gula 1kg',price:14000,stock:20,emoji:'🍬'},
-  {id:6,name:'Minyak 1L',price:18000,stock:10,emoji:'🛢️'},
-  {id:7,name:'Rokok Sampoerna',price:25000,stock:30,emoji:'🚬'},
-  {id:8,name:'Kopi Sachet',price:2500,stock:100,emoji:'☕'},
+  {id:1,name:'Indomie Goreng',price_sell:3500,stock:48,emoji:'🍜'},
+  {id:2,name:'Teh Botol Sosro',price_sell:4500,stock:24,emoji:'🍵'},
+  {id:3,name:'Aqua 600ml',price_sell:3000,stock:60,emoji:'💧'},
+  {id:4,name:'Sabun Lifebuoy',price_sell:7000,stock:15,emoji:'🧼'},
+  {id:5,name:'Gula 1kg',price_sell:14000,stock:20,emoji:'🍬'},
+  {id:6,name:'Minyak 1L',price_sell:18000,stock:10,emoji:'🛢️'},
+  {id:7,name:'Rokok Sampoerna',price_sell:25000,stock:30,emoji:'🚬'},
+  {id:8,name:'Kopi Sachet',price_sell:2500,stock:100,emoji:'☕'},
 ];
 let demoTransactions = [];
 let allProducts = [];
@@ -762,6 +789,31 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function copyToClipboard(text, element, inputId) {
+  navigator.clipboard.writeText(text).then(() => {
+    // Otomatis isi kolom input di atasnya
+    if (inputId && $(inputId)) {
+      $(inputId).value = text;
+    }
+
+    // Efek visual indikator sukses pada tombol yang diklik
+    const originalText = element.innerText;
+    element.innerText = "✓ Tersalin & Ditempel!";
+    element.style.backgroundColor = "#f0fdf4"; // Hijau muda soft
+    element.style.borderColor = "#bbf7d0";
+    element.style.color = "#166534";
+
+    // Kembalikan ke tampilan default setelah 2 detik
+    setTimeout(() => {
+      element.innerText = originalText;
+      element.style.backgroundColor = "white";
+      element.style.borderColor = "#cbd5e1";
+      element.style.color = "#334155";
+    }, 2000);
+  }).catch(err => {
+    toast('Gagal menyalin: ' + err);
+  });
+}
 // ── SUPABASE CONNECT ────────────────────────────────────────────
 async function connectSupabase() {
   const url = $('sb-url').value.trim();
@@ -874,9 +926,16 @@ function doLogout() {
 
 // ── PRODUCTS ────────────────────────────────────────────────────
 async function loadProducts() {
-  if (demoMode) { allProducts = [...demoProducts]; }
+  if (demoMode) { 
+    // Opsional: Jika ingin mode demo juga terurut secara alfabet
+    allProducts = [...demoProducts].sort((a, b) => a.name.localeCompare(b.name)); 
+  }
   else {
-    const { data, error } = await sb.from('products').select('*').order('id');
+    // MENAMBAHKAN ORDER BY NAME ASCENDING DI SUPABASE
+    const { data, error } = await sb.from('products')
+      .select('*')
+      .order('name', { ascending: true }); // ← Mengurutkan berdasarkan kolom 'name' dari A ke Z
+      
     if (error) { toast('Gagal memuat produk'); return; }
     allProducts = data;
   }
@@ -892,7 +951,7 @@ function renderProducts(list) {
     return `<div class="prod-card">
       <div class="prod-emoji">${p.emoji || '📦'}</div>
       <div class="prod-name">${p.name}</div>
-      <div class="prod-price">${fmt(p.price)}</div>
+      <div class="prod-price">${fmt(p.price_sell || 0)}</div>
       <div class="prod-stock">Stok: ${p.stock}</div>
       <div class="qty-row">
         <button class="qty-btn minus" onclick="updateCart(${p.id},-1)">−</button>
@@ -921,7 +980,7 @@ function updateCart(id, d) {
 
 function updateCartBar() {
   const items = Object.entries(cart).filter(([,q]) => q > 0);
-  const total = items.reduce((s, [id, q]) => s + (allProducts.find(p => p.id == id)?.price || 0) * q, 0);
+  const total = items.reduce((s, [id, q]) => s + (allProducts.find(p => p.id == id)?.price_sell || 0) * q, 0);
   const count = items.reduce((s, [,q]) => s + q, 0);
   if (count > 0) {
     show('cart-bar');
@@ -938,12 +997,16 @@ function renderStok() {
       <div class="stok-emoji">${p.emoji || '📦'}</div>
       <div class="stok-info">
         <div class="stok-name">${p.name}</div>
-        <div class="stok-price">${fmt(p.price)}</div>
+        <div class="stok-price">${fmt(p.price_sell || 0)}</div>
       </div>
       <div class="stok-ctrl">
         <button class="stok-btn" onclick="adjustStock(${p.id},-1)">−</button>
         <span class="stok-qty" id="stok-${p.id}">${p.stock}</span>
         <button class="stok-btn" onclick="adjustStock(${p.id},1)">+</button>
+      </div>
+      <div class="stok-actions">
+        <button class="stok-edit-btn" onclick="editProduct(${p.id})" title="Edit">✏️</button>
+        <button class="stok-del-btn" onclick="openConfirmDel(${p.id})" title="Hapus">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -961,57 +1024,126 @@ async function adjustStock(id, d) {
   }
 }
 
-// ── ADD PRODUCT ─────────────────────────────────────────────────
+// ── DATA MANAGEMENT STATE ───────────────────────────────────────
 let editProductId = null;
+let deleteProductId = null;
+
+// ── ADD / EDIT PRODUCT UI ───────────────────────────────────────
 function openAddProduct(p = null) {
   editProductId = p ? p.id : null;
   $('add-prod-title').textContent = p ? 'Edit Produk' : 'Tambah Produk';
   $('np-name').value = p ? p.name : '';
-  $('np-price').value = p ? p.price : '';
+  $('np-price-buy').value = p ? (p.price_buy || '') : '';
+  $('np-price-sell').value = p ? p.price_sell : '';
   $('np-stock').value = p ? p.stock : '';
   $('np-emoji').value = p ? p.emoji : '';
   show('add-prod-overlay');
 }
-function closeAddProduct() { hide('add-prod-overlay'); }
 
+function closeAddProduct() { 
+  hide('add-prod-overlay'); 
+}
+
+function editProduct(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (p) openAddProduct(p);
+}
+
+// ── DELETE PRODUCT UI & ACTION ──────────────────────────────────
+function openConfirmDel(id) {
+  deleteProductId = id;
+  const p = allProducts.find(x => x.id === id);
+  $('confirm-del-msg').textContent = `Hapus produk "${p ? p.name : ''}"? Tindakan ini tidak dapat dibatalkan.`;
+  show('confirm-del-overlay');
+}
+
+function closeConfirmDel() { 
+  deleteProductId = null; 
+  hide('confirm-del-overlay'); 
+}
+
+async function confirmDeleteProduct() {
+  if (!deleteProductId) return;
+  const id = deleteProductId;
+  closeConfirmDel();
+
+  try {
+    if (demoMode) {
+      const idx = demoProducts.findIndex(x => x.id === id);
+      if (idx !== -1) demoProducts.splice(idx, 1);
+    } else {
+      const { error } = await sb.from('products').delete().eq('id', id);
+      if (error) throw error;
+    }
+    
+    if (cart[id]) {
+      delete cart[id];
+      updateCartBar();
+    }
+    
+    await loadProducts();
+    toast('Produk berhasil dihapus');
+  } catch (e) {
+    toast('Gagal hapus: ' + e.message);
+  }
+}
+
+// ── SAVE PRODUCT (INSERT & UPDATE) ──────────────────────────────
 async function saveProduct() {
   const name = $('np-name').value.trim();
-  const price = parseInt($('np-price').value);
+  const price_buy = parseInt($('np-price-buy').value) || 0;
+  const price_sell = parseInt($('np-price-sell').value);
   const stock = parseInt($('np-stock').value);
   const emoji = $('np-emoji').value.trim() || '📦';
-  if (!name || isNaN(price) || isNaN(stock)) { toast('Isi semua kolom dengan benar'); return; }
+  
+  if (!name || isNaN(price_sell) || isNaN(stock)) { 
+    toast('Isi semua kolom dengan benar'); 
+    return; 
+  }
 
   const btn = $('save-prod-btn');
-  btn.innerHTML = '<span class="loader"></span>'; btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>'; 
+  btn.disabled = true;
 
   try {
     if (demoMode) {
       if (editProductId) {
         const p = demoProducts.find(x => x.id === editProductId);
-        if (p) { p.name = name; p.price = price; p.stock = stock; p.emoji = emoji; }
+        if (p) { 
+          p.name = name; 
+          p.price_sell = price_sell; 
+          p.stock = stock; 
+          p.emoji = emoji; 
+        }
       } else {
-        demoProducts.push({ id: Date.now(), name, price, stock, emoji });
+        demoProducts.push({ id: Date.now(), name, price_sell, stock, emoji });
       }
     } else {
+      const payload = { name, price_buy, price_sell, stock, emoji };
       if (editProductId) {
-        await sb.from('products').update({ name, price, stock, emoji }).eq('id', editProductId);
+        const { error } = await sb.from('products').update(payload).eq('id', editProductId);
+        if (error) throw error;
       } else {
-        await sb.from('products').insert({ name, price, stock, emoji });
+        const { error } = await sb.from('products').insert(payload);
+        if (error) throw error;
       }
     }
+    
     closeAddProduct();
     await loadProducts();
     toast(editProductId ? 'Produk diperbarui' : 'Produk ditambahkan');
   } catch (e) {
     toast('Gagal: ' + e.message);
   }
-  btn.innerHTML = 'Simpan Produk'; btn.disabled = false;
+  
+  btn.innerHTML = 'Simpan Produk'; 
+  btn.disabled = false;
 }
 
 // ── TRANSAKSI ───────────────────────────────────────────────────
 function getTotal() {
   return Object.entries(cart).filter(([,q]) => q > 0)
-    .reduce((s, [id, q]) => s + (allProducts.find(p => p.id == id)?.price || 0) * q, 0);
+    .reduce((s, [id, q]) => s + (allProducts.find(p => p.id == id)?.price_sell || 0) * q, 0);
 }
 
 function openPayModal() {
@@ -1019,7 +1151,7 @@ function openPayModal() {
   const total = getTotal();
   $('pay-items').innerHTML = items.map(([id, q]) => {
     const p = allProducts.find(x => x.id == id);
-    return `<div class="modal-line"><span>${p.emoji} ${p.name} ×${q}</span><span class="val">${fmt(p.price * q)}</span></div>`;
+    return `<div class="modal-line"><span>${p.emoji} ${p.name} ×${q}</span><span class="val">${fmt((p.price_sell || 0) * q)}</span></div>`;
   }).join('');
   $('pay-total').textContent = fmt(total);
   $('cash-input').value = '';
@@ -1027,13 +1159,23 @@ function openPayModal() {
   selectPay('tunai');
   show('pay-overlay');
 }
+
 function closePayModal() { hide('pay-overlay'); }
 
 function selectPay(m) {
   payMethod = m;
   $('opt-tunai').classList.toggle('selected', m === 'tunai');
   $('opt-qris').classList.toggle('selected', m === 'qris');
+  
+  // Mengatur visibilitas input tunai
   $('cash-section').style.display = m === 'tunai' ? 'block' : 'none';
+  
+  // LOGIKA BARU: Tampilkan nomor rekening jika memilih QRIS, sembunyikan jika tunai
+  if (m === 'qris') {
+    $('qris-info').classList.remove('hidden');
+  } else {
+    $('qris-info').classList.add('hidden');
+  }
 }
 
 function calcChange() {
@@ -1061,7 +1203,7 @@ async function processPayment() {
   try {
     const items = Object.entries(cart).filter(([,q]) => q > 0).map(([id, q]) => {
       const p = allProducts.find(x => x.id == id);
-      return { id: parseInt(id), name: p.name, qty: q, price: p.price };
+      return { id: parseInt(id), name: p.name, qty: q, price: p.price_sell };
     });
     const code = 'TRX' + String(allTransactions.length + 1).padStart(3, '0');
     const trxData = { code, total, method: payMethod, kasir: currentUser?.name || '-', items };
@@ -1070,14 +1212,12 @@ async function processPayment() {
       demoTransactions.unshift({ ...trxData, id: Date.now(), created_at: new Date().toISOString() });
     } else {
       await sb.from('transactions').insert(trxData);
-      // update stok di DB
       for (const item of items) {
         const p = allProducts.find(x => x.id === item.id);
         if (p) await sb.from('products').update({ stock: Math.max(0, p.stock - item.qty) }).eq('id', item.id);
       }
     }
 
-    // Update local stock
     items.forEach(({ id, qty }) => {
       const p = allProducts.find(x => x.id === id);
       if (p) p.stock = Math.max(0, p.stock - qty);
@@ -1161,21 +1301,17 @@ function renderLaporan() {
   const todayIdx = new Date().getDay();
   const weekData = days.map((d, i) => ({
     day: d,
-    amt: i === todayIdx ? total : Math.floor(Math.random() * 500000 + 100000)
+    amt: i === todayIdx ? total : 0,
+    isToday: i === todayIdx
   }));
   const maxAmt = Math.max(...weekData.map(x => x.amt), 1);
 
-  const grandTotal = currentPeriod === 'minggu'
-    ? total + weekData.filter((_, i) => i !== todayIdx).reduce((s, x) => s + x.amt, 0)
-    : total * 4;
-
-  $('lap-total').textContent = fmt(grandTotal);
+  $('lap-total').textContent = fmt(total);
   $('lap-trx-count').textContent = allTransactions.length + ' transaksi berhasil';
   $('lap-tunai').textContent = fmt(tunai);
   $('lap-qris').textContent = fmt(qris);
   $('lap-avg').textContent = fmt(avg);
 
-  // terlaris
   const prodCount = {};
   allTransactions.forEach(t => {
     const items = Array.isArray(t.items) ? t.items : [];
@@ -1186,9 +1322,8 @@ function renderLaporan() {
 
   $('bar-chart').innerHTML = weekData.map(x => {
     const h = Math.round((x.amt / maxAmt) * 75) + 4;
-    const isToday = x.day === days[todayIdx];
     return `<div class="bar-col">
-      <div class="bar" style="height:${h}px;background:${isToday ? 'var(--green)' : 'rgba(46,204,138,.22)'}"></div>
+      <div class="bar" style="height:${h}px;background:${x.isToday ? 'var(--green)' : 'rgba(46,204,138,.22)'}"></div>
       <div class="bar-lbl">${x.day}</div>
     </div>`;
   }).join('');
